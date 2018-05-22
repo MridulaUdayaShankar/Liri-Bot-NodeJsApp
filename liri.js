@@ -1,4 +1,5 @@
 require("dotenv").config();
+var fs = require("fs");
 // Include the request npm package
 var request = require("request");
 // Include the twitter npm package
@@ -6,81 +7,110 @@ var Twitter = require("twitter");
 // Include the node-spotify-api npm package
 var Spotify = require("node-spotify-api");
 // import the keys.js file
-var keys = require("./keys.js");
-
-var userRequest = process.argv[2];
-var fs = require("fs");
+var keys = require("./keys");
+// Store all of the user input arguments in an array
+var userChoice = process.argv[2];
+const nodeArgs = process.argv;
+var userInputArr = nodeArgs.splice(3);
+var userInput = userInputArr.join(" ");
+console.log("userInput", userInput);
 
 ///////////////////////////////movie-this////////////////////////////////////////////////////////
 function movie() {
-  // Store all of the user input arguments in an array
-  var nodeArgs = process.argv;
   // Create an empty variable for holding the movie name
-  var movieName = "";
-
-  // Loop through all the words in the node argument
-  for (var i = 2; i < nodeArgs.length; i++) {
-    if (i > 2 && i < nodeArgs.length) {
-      movieName = movieName + "+" + nodeArgs[i];
-    } else {
-      movieName += nodeArgs[i];
-    }
-  }
-  var queryUrl =
-    "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
+  var queryUrl = `http://www.omdbapi.com/?t=${userInput}&y=&plot=short&apikey=trilogy`;
   // Then run a request to the OMDB API with the movie specified
   request(queryUrl, function(error, response, body) {
     // If there were no errors and the response code was 200 (i.e. the request was successful)...
     if (!error && response.statusCode === 200) {
       // Then print out the imdbRating
-      console.log("The movie's rating is: " + JSON.parse(body).imdbRating);
+      console.log(`The movie is: ${body}`);
     }
   });
 }
+
 //////////////////////////////////////spotify-this-song/////////////////////////////////////////////////
 function spotifyTrack() {
-  spotify.search(
-    { type: "track", query: userRequest, limit: 20 },
-    function(err, data) {
-      if (err) {
-        return console.log("Error occurred: " + err);
-      }
-      console.log(data.tracks);
-    }
-  );
-}
+  console.log(userInput, "@#$%^&*&^%$#@#$%^&*");
   var spotify = new Spotify(keys.spotify);
-  
+  spotify
+    .search({ type: "track", query: userInput, limit: 1 })
+    .then(function(data) {
+      var temp = data.tracks.items[0];
+      var artists = [];
+      temp.artists.forEach(function(artist) {
+        artists.push(artist.name);
+      });
+
+      var displayObj = {
+        artists,
+        name: temp.name,
+        previewLink: temp.uri,
+        album: temp.album.name
+      };
+      console.log(JSON.stringify(displayObj));
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+}
+
 //////////////////////////////////////my-tweets/////////////////////////////////////////////////
 function tweets() {
+  var arr = [];
   var params = { screen_name: "nodejs" };
-  client.get("statuses/user_timeline", params, function(
+  var client = new Twitter(keys.twitter);
+  client.get("statuses/home_timeline", params, function(
     error,
     tweets,
     response
   ) {
-    if (!error) {
-      console.log(tweets);
-    }
+    if (error) throw error;
+    tweets.forEach(element => {
+      if (element.text) {
+        arr.push(element.text);
+      }
+      console.log(arr);
+    });
   });
 }
-  var client = new Twitter(keys.twitter);
-  
 
-  if(userRequest === 'spotify-this-song'){
+switch (userChoice) {
+  case "spotify-this-song":
     spotifyTrack();
-  } else if (userRequest === 'my-tweets'){
+    break;
+
+  case "my-tweets":
     tweets();
-  } else if(userRequest === 'movie-this'){
+    break;
+
+  case "movie-this":
     movie();
-  } else if(userRequest === 'do-what-it-says'){
-  ////////////////////////////////////read-file/do-what-it-says///////////////////////////////////////////////////
-    
+    break;
+
+  case "do-what-it-says":
+    ////////////////////////////////////read-file/do-what-it-says///////////////////////////////////////////////////
+
     fs.readFile("random.txt", "utf8", function(error, data) {
-    // If the code experiences any errors it will log the error to the console.
-     if (error) {
-      return console.log(error);
+      // If the code experiences any errors it will log the error to the console.
+      if (error) {
+        return console.log(error);
       }
+      userInput = data;
+      spotifyTrack();
     });
-    spotifyTrack();
-  }
+    break;
+  /*
+    * Default case 
+    */
+  default:
+    fs.readFile("random.txt", "utf8", function(error, data) {
+      // If the code experiences any errors it will log the error to the console.
+      if (error) {
+        return console.log(error);
+      }
+      userInput = data;
+      spotifyTrack();
+    });
+    break;
+}
