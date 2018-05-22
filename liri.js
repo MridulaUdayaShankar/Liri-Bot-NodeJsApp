@@ -1,74 +1,86 @@
 require("dotenv").config();
+// Include the request npm package
 var request = require("request");
-var spotify = new Spotify(keys.spotify);
-var client = new Twitter(keys.twitter);
+// Include the twitter npm package
+var Twitter = require("twitter");
+// Include the node-spotify-api npm package
+var Spotify = require("node-spotify-api");
+// import the keys.js file
+var keys = require("./keys.js");
 
-// Include the request npm package 
-var request = require("request");
-// Load the NPM Package inquirer
-var inquirer = require("inquirer");
+var userRequest = process.argv[2];
+var fs = require("fs");
 
-// Store all of the arguments in an array
-var nodeArgs = process.argv;
+///////////////////////////////movie-this////////////////////////////////////////////////////////
+function movie() {
+  // Store all of the user input arguments in an array
+  var nodeArgs = process.argv;
+  // Create an empty variable for holding the movie name
+  var movieName = "";
 
-// Create an empty variable for holding the movie name
-var movieName = "";
-
-// Loop through all the words in the node argument
-
-for (var i = 2; i < nodeArgs.length; i++) {
-
-  if (i > 2 && i < nodeArgs.length) {
-    movieName = movieName + "+" + nodeArgs[i];
+  // Loop through all the words in the node argument
+  for (var i = 2; i < nodeArgs.length; i++) {
+    if (i > 2 && i < nodeArgs.length) {
+      movieName = movieName + "+" + nodeArgs[i];
+    } else {
+      movieName += nodeArgs[i];
+    }
   }
-  else {
-    movieName += nodeArgs[i];
-  }
+  var queryUrl =
+    "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
+  // Then run a request to the OMDB API with the movie specified
+  request(queryUrl, function(error, response, body) {
+    // If there were no errors and the response code was 200 (i.e. the request was successful)...
+    if (!error && response.statusCode === 200) {
+      // Then print out the imdbRating
+      console.log("The movie's rating is: " + JSON.parse(body).imdbRating);
+    }
+  });
 }
-// Then run a request to the OMDB API with the movie specified
-request("http://www.omdbapi.com/?t=" +movieName+ "&y=&plot=short&apikey=trilogy", function(error, response, body) {
+//////////////////////////////////////spotify-this-song/////////////////////////////////////////////////
+function spotifyTrack() {
+  spotify.search(
+    { type: "track", query: userRequest, limit: 20 },
+    function(err, data) {
+      if (err) {
+        return console.log("Error occurred: " + err);
+      }
+      console.log(data.tracks);
+    }
+  );
+}
+  var spotify = new Spotify(keys.spotify);
+  
+//////////////////////////////////////my-tweets/////////////////////////////////////////////////
+function tweets() {
+  var params = { screen_name: "nodejs" };
+  client.get("statuses/user_timeline", params, function(
+    error,
+    tweets,
+    response
+  ) {
+    if (!error) {
+      console.log(tweets);
+    }
+  });
+}
+  var client = new Twitter(keys.twitter);
+  
 
-  // If there were no errors and the response code was 200 (i.e. the request was successful)...
-  if (!error && response.statusCode === 200) {
-    // Then print out the imdbRating
-    console.log("The movie's rating is: " + JSON.parse(body).imdbRating);
+  if(userRequest === 'spotify-this-song'){
+    spotifyTrack();
+  } else if (userRequest === 'my-tweets'){
+    tweets();
+  } else if(userRequest === 'movie-this'){
+    movie();
+  } else if(userRequest === 'do-what-it-says'){
+  ////////////////////////////////////read-file/do-what-it-says///////////////////////////////////////////////////
+    
+    fs.readFile("random.txt", "utf8", function(error, data) {
+    // If the code experiences any errors it will log the error to the console.
+     if (error) {
+      return console.log(error);
+      }
+    });
+    spotifyTrack();
   }
-});
-
-// Created a series of questions
-inquirer.prompt([
-
-  {
-    type: "input",
-    name: "name",
-    message: "Who are you???"
-  },
-
-  {
-    type: "list",
-    name: "doingWhat",
-    message: "What are you doing in my house??",
-    choices: ["I made you cookies!", "No lie dude. I'm here to rob you.", "Uh. This is my house... Who are YOU???"]
-  },
-
-  {
-    type: "checkbox",
-    name: "carryingWhat",
-    message: "What are you carrying in your hands??",
-    choices: ["TV", "Slice of Toast", "Butter Knife"]
-  },
-
-  {
-    type: "confirm",
-    name: "canLeave",
-    message: "Can you leave now?"
-  },
-
-  {
-    type: "password",
-    name: "myPassword",
-    message: "Okay fine. You can stay. But only if you say the magic password."
-  }
-
-]).then(function(user) {
-});
