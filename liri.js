@@ -8,54 +8,75 @@ var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
 // import the keys.js file
 var keys = require("./keys");
+
 // Store all of the user input arguments in an array
-var userChoice = process.argv[2];
-const nodeArgs = process.argv;
+var nodeArgs = process.argv;
+var command = process.argv[2];
+
 var userInputArr = nodeArgs.splice(3);
 var userInput = userInputArr.join(" ");
-console.log("userInput", userInput);
-
-///////////////////////////////movie-this////////////////////////////////////////////////////////
+/*
+ * movie-this
+ */
 function movie() {
-  // Create an empty variable for holding the movie name
   var queryUrl = `http://www.omdbapi.com/?t=${userInput}&y=&plot=short&apikey=trilogy`;
   // Then run a request to the OMDB API with the movie specified
   request(queryUrl, function(error, response, body) {
     // If there were no errors and the response code was 200 (i.e. the request was successful)...
     if (!error && response.statusCode === 200) {
       // Then print out the imdbRating
-      console.log(`The movie is: ${body}`);
+      console.log("\nMovie Title: " + JSON.parse(body).Title + "\n");
+      console.log("Release Year: " + JSON.parse(body).Year + "\n");
+      console.log("IMDB Rating: " + JSON.parse(body).imdbRating + "\n");
+      console.log(
+        "Rotten Tomatoes Rating of the movie: " +
+          JSON.parse(body).Ratings[1].Value +
+          "\n"
+      );
+      console.log(
+        "Country where the movie was produced: " +
+          JSON.parse(body).Country +
+          "\n"
+      );
+      console.log("Language of the movie: " + JSON.parse(body).Language + "\n");
+      console.log("Plot of the movie: " + JSON.parse(body).Plot + "\n");
+      console.log("Actors in the movie: " + JSON.parse(body).Actors + "\n");
     }
   });
 }
+/*
+ * spotify-this-song
+ */
 
-//////////////////////////////////////spotify-this-song/////////////////////////////////////////////////
 function spotifyTrack() {
-  console.log(userInput, "@#$%^&*&^%$#@#$%^&*");
+ 
   var spotify = new Spotify(keys.spotify);
   spotify
     .search({ type: "track", query: userInput, limit: 1 })
     .then(function(data) {
+      // console.log(data);
       var temp = data.tracks.items[0];
-      var artists = [];
-      temp.artists.forEach(function(artist) {
-        artists.push(artist.name);
-      });
+      // var artists = [];
+      // temp.artists.forEach(function(artist) {
+      //   artists.push(artist.name);
+      // });
 
-      var displayObj = {
-        artists,
-        name: temp.name,
-        previewLink: temp.uri,
-        album: temp.album.name
-      };
-      console.log(JSON.stringify(displayObj));
+      // var displayObj = {
+        // name: temp.name,
+        // previewLink: temp.uri,
+        // album: temp.album.name
+      // };
+      console.log('\nAlbum Name: ' + JSON.stringify(temp.name));
+      console.log('\nSpotify Link to play the song: ' + JSON.stringify(temp.external_urls.spotify));
+      console.log('\nArtist Name: ' + JSON.stringify(temp.artists[0].name)+ '\n');
     })
     .catch(function(err) {
       console.log(err);
     });
 }
-
-//////////////////////////////////////my-tweets/////////////////////////////////////////////////
+/*
+ * my-tweets
+ */
 function tweets() {
   var arr = [];
   var params = { screen_name: "nodejs" };
@@ -75,7 +96,8 @@ function tweets() {
   });
 }
 
-switch (userChoice) {
+//Switch case statement to call functions for corresponding commands
+switch (command) {
   case "spotify-this-song":
     spotifyTrack();
     break;
@@ -89,8 +111,9 @@ switch (userChoice) {
     break;
 
   case "do-what-it-says":
-    ////////////////////////////////////read-file/do-what-it-says///////////////////////////////////////////////////
-
+    /*
+    * read-file/do-what-it-says
+    */
     fs.readFile("random.txt", "utf8", function(error, data) {
       // If the code experiences any errors it will log the error to the console.
       if (error) {
