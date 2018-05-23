@@ -39,4 +39,11 @@ If no song is provided then the program will default to "The Sign" by Ace of Bas
 #### node liri.js do-what-it-says  
 It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt
 
-  
+## Installation
+1. Install Node JS on your computer 
+2. Install the below mentioned npm packages using the node command npm install for each of the packages after using the npm init command
+
+* Twitter
+* Node-Spotify-API
+* Request
+* DotEnv
