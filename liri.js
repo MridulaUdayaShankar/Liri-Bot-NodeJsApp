@@ -15,65 +15,64 @@ var command = process.argv[2];
 
 var userInputArr = nodeArgs.splice(3);
 var userInput = userInputArr.join(" ");
+var defaultInput = {
+  movie: "Mr.Nobody",
+  spotify: "Not Afraid",
+}
 /*
  * movie-this
  */
-function movie() {
-  var queryUrl = `http://www.omdbapi.com/?t=${userInput}&y=&plot=short&apikey=trilogy`;
-  // Then run a request to the OMDB API with the movie specified
-  request(queryUrl, function(error, response, body) {
-    // If there were no errors and the response code was 200 (i.e. the request was successful)...
-    if (!error && response.statusCode === 200) {
-      // Then print out the imdbRating
-      console.log("\nMovie Title: " + JSON.parse(body).Title + "\n");
-      console.log("Release Year: " + JSON.parse(body).Year + "\n");
-      console.log("IMDB Rating: " + JSON.parse(body).imdbRating + "\n");
-      console.log(
-        "Rotten Tomatoes Rating of the movie: " +
-          JSON.parse(body).Ratings[1].Value +
-          "\n"
-      );
-      console.log(
-        "Country where the movie was produced: " +
-          JSON.parse(body).Country +
-          "\n"
-      );
-      console.log("Language of the movie: " + JSON.parse(body).Language + "\n");
-      console.log("Plot of the movie: " + JSON.parse(body).Plot + "\n");
-      console.log("Actors in the movie: " + JSON.parse(body).Actors + "\n");
+
+  function movie() {
+    if (!userInput) {
+      userInput = defaultInput.movie;
     }
-  });
-}
+    var queryUrl = `http://www.omdbapi.com/?t=${userInput}&y=&plot=short&apikey=trilogy`;
+    // Then run a request to the OMDB API with the movie specified
+    request(queryUrl, function(error, response, body) {
+      // If there were no errors and the response code was 200 (i.e. the request was successful)...
+      if (!error && response.statusCode === 200) {
+        // Then print out the imdbRating
+        console.log("\nMovie Title: " + JSON.parse(body).Title + "\n");
+        console.log("Release Year: " + JSON.parse(body).Year + "\n");
+        console.log("IMDB Rating: " + JSON.parse(body).imdbRating + "\n");
+        console.log("Rotten Tomatoes Rating of the movie: " +JSON.parse(body).Ratings[1].Value+"\n");
+        console.log("Country where the movie was produced: " +JSON.parse(body).Country +'\n');
+        console.log("Language of the movie: " + JSON.parse(body).Language + "\n");
+        console.log("Plot of the movie: " + JSON.parse(body).Plot + "\n");
+        console.log("Actors in the movie: " + JSON.parse(body).Actors + "\n");
+      }
+    });
+  }
+
 /*
  * spotify-this-song
  */
-
 function spotifyTrack() {
- 
+  if (!userInput) {
+    userInput = defaultInput.spotify;
+  }
   var spotify = new Spotify(keys.spotify);
-  spotify
-    .search({ type: "track", query: userInput, limit: 1 })
-    .then(function(data) {
-      // console.log(data);
-      var temp = data.tracks.items[0];
-      // var artists = [];
-      // temp.artists.forEach(function(artist) {
-      //   artists.push(artist.name);
-      // });
+    spotify
+      .search({ type: "track", query: userInput, limit: 1 })
+      .then(function(data) {
+        // console.log(data);
+        var temp = data.tracks.items[0];
 
-      // var displayObj = {
-        // name: temp.name,
-        // previewLink: temp.uri,
-        // album: temp.album.name
-      // };
-      console.log('\nAlbum Name: ' + JSON.stringify(temp.name));
-      console.log('\nSpotify Link to play the song: ' + JSON.stringify(temp.external_urls.spotify));
-      console.log('\nArtist Name: ' + JSON.stringify(temp.artists[0].name)+ '\n');
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
-}
+        console.log("\nAlbum Name: " + JSON.stringify(temp.name));
+        console.log(
+          "\nSpotify Link to play the song: " +
+            JSON.stringify(temp.external_urls.spotify)
+        );
+        console.log(
+          "\nArtist Name: " + JSON.stringify(temp.artists[0].name) + "\n"
+        );
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  }
+
 /*
  * my-tweets
  */
@@ -86,13 +85,16 @@ function tweets() {
     tweets,
     response
   ) {
-    if (error) throw error;
+    if (error) {
+      throw error;
+    } else {
+    }
     tweets.forEach(element => {
       if (element.text) {
         arr.push(element.text);
       }
-      console.log(arr);
     });
+    console.log("\n" + arr + "\n");
   });
 }
 
@@ -114,19 +116,6 @@ switch (command) {
     /*
     * read-file/do-what-it-says
     */
-    fs.readFile("random.txt", "utf8", function(error, data) {
-      // If the code experiences any errors it will log the error to the console.
-      if (error) {
-        return console.log(error);
-      }
-      userInput = data;
-      spotifyTrack();
-    });
-    break;
-  /*
-    * Default case 
-    */
-  default:
     fs.readFile("random.txt", "utf8", function(error, data) {
       // If the code experiences any errors it will log the error to the console.
       if (error) {

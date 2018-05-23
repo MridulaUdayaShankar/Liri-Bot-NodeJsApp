@@ -1,4 +1,4 @@
-console.log('this is loaded');
+console.log('\nInput one of the following commands after filename:(suggest a movie/song that you like)\nEx:node liri.js movie-this\n\nmovie-this\nspotify-this-song\nmy-tweets\ndo-what-it-says');
 
 exports.twitter = {
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
