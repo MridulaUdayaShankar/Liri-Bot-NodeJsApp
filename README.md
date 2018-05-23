@@ -10,8 +10,10 @@ LIRI is a Language Interpretation and Recognition Interface which is a command l
   * `movie-this`
 
   * `do-what-it-says`
-
+  
 ## Pre-requisites
+ #### Watch the demo video: https://drive.google.com/file/d/1hWZcEq6YB13DZ58E16KcY_us79jjNseL/view
+
 What Each Command Should Do:
 
 #### node liri.js my-tweets
